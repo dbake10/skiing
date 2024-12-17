@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <a href = "David.html" target="_self">Resume |  </a>
+  <a href = "index.html" target="_self"> Home</a>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Block Jump</title>
+ 
+  <style>
+    body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f0f0; }
+    canvas { background: white; border: 1px solid black; }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="600" height="150"></canvas>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const dino = { x: 50, y: 130, width: 20, height: 30, gravity: 0.8, jumpStrength: -15, speed: 3, velocityY: 0, jumping: false };
+    const cacti = [];
+    let score = 0;
+
+    function drawDino() {
+      ctx.fillStyle = "green";
+      ctx.fillRect(dino.x, dino.y, dino.width, dino.height);
+    }
+
+    function drawCacti() {
+      for (const cactus of cacti) {
+        ctx.fillStyle = "brown";
+        ctx.fillRect(cactus.x, cactus.y, cactus.width, cactus.height);
+        cactus.x -= dino.speed;
+      }
+      if (cacti.length && cacti[0].x + cacti[0].width < 0) cacti.shift();
+    }
+
+    function jump() {
+      if (!dino.jumping) {
+        dino.jumping = true;
+        dino.velocityY = dino.jumpStrength;
+      }
+    }
+
+    function update() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Dino movement
+      dino.velocityY += dino.gravity;
+      dino.y += dino.velocityY;
+      if (dino.y > 130) { dino.y = 130; dino.jumping = false; }
+
+      // Generate new cactus
+      if (Math.random() < 0.01) {
+        const cactusHeight = Math.random() * 20 + 20;
+        cacti.push({ x: canvas.width, y: 130 - cactusHeight, width: 20, height: cactusHeight });
+      }
+
+      // Collision detection
+      for (const cactus of cacti) {
+        if (dino.x + dino.width > cactus.x && dino.x < cactus.x + cactus.width &&
+            dino.y + dino.height > cactus.y) {
+          alert("Game Over! Score: " + score);
+          score = 0; // Reset score
+          cacti.length = 0; // Clear obstacles
+        }
+      }
+
+      // Draw everything
+      drawDino();
+      drawCacti();
+
+      // Increase score
+      score++;
+      requestAnimationFrame(update);
+    }
+
+    window.addEventListener("keydown", jump);
+    update();
+  </script>
+</body>
+</html>
